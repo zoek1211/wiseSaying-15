@@ -44,3 +44,6 @@ bin/
 
 ### Custom ###
 temp
+### App data ###
+db/
+db_test/

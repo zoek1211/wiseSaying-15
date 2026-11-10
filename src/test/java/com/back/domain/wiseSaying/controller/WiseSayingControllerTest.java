@@ -1,6 +1,9 @@
 package com.back.domain.wiseSaying.controller;
 
+import com.back.AppConfig;
 import com.back.AppTestRunner;
+import com.back.standard.util.Util;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +13,10 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class WiseSayingControllerTest {
+    @BeforeEach
+    void beforeEach() {
+        AppTestRunner.clearDb();
+    }
     @Test
     @DisplayName("등록")
     void t1() {
@@ -296,5 +303,145 @@ public class WiseSayingControllerTest {
                 .doesNotContain("2 / 작자미상 2 / 명언 2")
                 .contains("1 / 작자미상 1 / 명언 1")
                 .contains("페이지 : [1]");
+    }
+
+    @Test
+    @DisplayName("등록 후 재시작해도 목록에 남아 있다.")
+    void t16() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                등록
+                과거에 집착하지 마라.
+                작자미상
+                """);
+
+        String rs = AppTestRunner.run("목록");
+
+        assertThat(rs)
+                .contains("2 / 작자미상 / 과거에 집착하지 마라.")
+                .contains("1 / 작자미상 / 현재를 사랑하라.");
+    }
+
+    @Test
+    @DisplayName("재시작 후 등록하면 마지막 번호 다음 번호를 쓴다.")
+    void t17() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                """);
+
+        String rs = AppTestRunner.run("""
+                등록
+                과거에 집착하지 마라.
+                작자미상
+                """);
+
+        assertThat(rs).contains("2번 명언이 등록되었습니다.");
+    }
+
+    @Test
+    @DisplayName("삭제한 번호는 재시작 후에도 재사용하지 않는다.")
+    void t18() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                등록
+                과거에 집착하지 마라.
+                작자미상
+                삭제?id=2
+                """);
+
+        String rs = AppTestRunner.run("""
+                등록
+                미래를 꿈꿔라.
+                작자미상
+                목록
+                """);
+
+        assertThat(rs)
+                .contains("3번 명언이 등록되었습니다.")
+                .contains("3 / 작자미상 / 미래를 꿈꿔라.")
+                .contains("1 / 작자미상 / 현재를 사랑하라.")
+                .doesNotContain("과거에 집착하지 마라.");
+    }
+
+    @Test
+    @DisplayName("수정 내용이 재시작 후에도 유지된다.")
+    void t19() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                수정?id=1
+                현재를 사랑하세요.
+                아리스토텔레스
+                """);
+
+        String rs = AppTestRunner.run("목록");
+
+        assertThat(rs)
+                .contains("1 / 아리스토텔레스 / 현재를 사랑하세요.")
+                .doesNotContain("1 / 작자미상 / 현재를 사랑하라.");
+    }
+
+    @Test
+    @DisplayName("등록하면 {번호}.json 과 lastId.txt 가 생기고, 삭제하면 json 파일이 지워진다.")
+    void t20() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                """);
+
+        String dir = AppConfig.getDbDirPath() + "/wiseSaying";
+
+        assertThat(Util.file.get(dir + "/1.json", "")).isEqualTo("""
+                {
+                    "id": 1,
+                    "content": "현재를 사랑하라.",
+                    "author": "작자미상"
+                }
+                """.stripIndent().trim());
+        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
+
+        AppTestRunner.run("삭제?id=1");
+
+        assertThat(Util.file.notExists(dir + "/1.json")).isTrue();
+        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("빌드")
+    void t21() {
+        String rs = AppTestRunner.run("""
+                등록
+                명언 1
+                작가 1
+                등록
+                명언 2
+                작가 2
+                빌드
+                """);
+
+        assertThat(rs).contains("data.json 파일의 내용이 갱신되었습니다.");
+
+        assertThat(Util.file.get(AppConfig.getDbDirPath() + "/wiseSaying/data.json", "")).isEqualTo("""
+                [
+                    {
+                        "id": 1,
+                        "content": "명언 1",
+                        "author": "작가 1"
+                    },
+                    {
+                        "id": 2,
+                        "content": "명언 2",
+                        "author": "작가 2"
+                    }
+                ]
+                """.stripIndent().trim());
     }
 }

@@ -30,6 +30,7 @@ public class App {
                 case "목록" -> wiseSayingController.actionList(rq);
                 case "삭제" -> wiseSayingController.actionDelete(rq);
                 case "수정" -> wiseSayingController.actionModify(rq);
+                case "빌드" -> wiseSayingController.actionBuild();
                 case "종료" -> {
                     systemController.actionExit();
                     return;

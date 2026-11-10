@@ -51,4 +51,8 @@ public class WiseSayingService {
     public WiseSaying findById(int id) {
         return wiseSayingRepository.findById(id);
     }
+
+    public String build() {
+        return wiseSayingRepository.build();
+    }
 }

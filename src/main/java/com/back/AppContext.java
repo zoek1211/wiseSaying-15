@@ -11,7 +11,6 @@ import java.util.Scanner;
 public class AppContext {
     public static Scanner scanner;
     public static SystemController systemController;
-    public static WiseSayingFileRepository wiseSayingFileRepository;
     public static WiseSayingRepository wiseSayingRepository;
     public static WiseSayingService wiseSayingService;
     public static WiseSayingController wiseSayingController;
@@ -19,8 +18,8 @@ public class AppContext {
     public static void renew(Scanner _scanner) {
         scanner = _scanner;
         systemController = new SystemController();
-        wiseSayingFileRepository = new WiseSayingFileRepository();
-        wiseSayingRepository = new WiseSayingRepository();
+        // 리포지터리 구현체만 갈아 끼우면 컨트롤러·서비스는 그대로 동작한다.
+        wiseSayingRepository = new WiseSayingFileRepository();
         wiseSayingService = new WiseSayingService();
         wiseSayingController = new WiseSayingController();
     }

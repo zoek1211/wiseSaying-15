@@ -6,6 +6,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Util {
     public static class file {
@@ -97,6 +98,22 @@ public class Util {
         public static boolean rmdir(String dirPath) {
             return delete(dirPath);
         }
+
+        // 폴더 안의 파일 이름 목록 (폴더가 없으면 빈 목록)
+        public static List<String> list(String dirPath) {
+            Path path = getPath(dirPath);
+
+            if (Files.notExists(path)) return List.of();
+
+            try (Stream<Path> stream = Files.list(path)) {
+                return stream
+                        .filter(Files::isRegularFile)
+                        .map(p -> p.getFileName().toString())
+                        .toList();
+            } catch (IOException e) {
+                throw new RuntimeException("디렉토리 목록 조회 실패: " + dirPath, e);
+            }
+        }
     }
 
     public static class json {
@@ -135,7 +152,7 @@ public class Util {
                 key = "\"" + key + "\"";
 
                 if (value instanceof String) {
-                    value = "\"" + value + "\"";
+                    value = "\"" + escape((String) value) + "\"";
                 }
 
                 sb.append("%s: %s,\n".formatted(key, value));
@@ -154,6 +171,7 @@ public class Util {
         public static Map<String, Object> toMap(String jsonStr) {
             Map<String, Object> map = new LinkedHashMap<>();
 
+            jsonStr = jsonStr.trim();
             jsonStr = jsonStr.substring(1, jsonStr.length() - 1);
 
             String[] jsonStrBits = jsonStr.split(",\n    \"");
@@ -163,7 +181,7 @@ public class Util {
 
                 if (jsonStrBit.endsWith(",")) jsonStrBit = jsonStrBit.substring(0, jsonStrBit.length() - 1);
 
-                String[] jsonField = jsonStrBit.split("\": ");
+                String[] jsonField = jsonStrBit.split("\": ", 2);
 
                 String key = jsonField[0];
                 if (key.startsWith("\"")) key = key.substring(1);
@@ -174,7 +192,7 @@ public class Util {
                 if (valueIsString) value = value.substring(1, value.length() - 1);
 
                 if (valueIsString) {
-                    map.put(key, value);
+                    map.put(key, unescape(value));
                 } else if (value.equals("true") || value.equals("false")) {
                     map.put(key, value.equals("true"));
                 } else if (value.contains(".")) {
@@ -185,6 +203,30 @@ public class Util {
             }
 
             return map;
+        }
+
+        private static String escape(String str) {
+            return str
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n");
+        }
+
+        private static String unescape(String str) {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < str.length(); i++) {
+                char c = str.charAt(i);
+
+                if (c == '\\' && i + 1 < str.length()) {
+                    char next = str.charAt(++i);
+                    sb.append(next == 'n' ? '\n' : next);
+                } else {
+                    sb.append(c);
+                }
+            }
+
+            return sb.toString();
         }
     }
 }
