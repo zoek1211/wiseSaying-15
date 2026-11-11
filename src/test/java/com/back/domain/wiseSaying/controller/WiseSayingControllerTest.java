@@ -498,4 +498,60 @@ public class WiseSayingControllerTest {
                 .contains("1 / 작자미상 / 실패_성공")
                 .doesNotContain("2 / 작자미상 / 실패와성공");
     }
+
+    @Test
+    @DisplayName("작가가 100자를 넘으면 오류 한 줄을 출력하고, 앱은 계속 동작한다.")
+    void t26() {
+        String rs = AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                %s
+                목록
+                """.formatted("가".repeat(101)));
+
+        assertThat(rs)
+                .contains("오류: ")
+                .contains("번호 / 작가 / 명언")
+                .doesNotContain("번 명언이 등록되었습니다.");
+    }
+
+    @Test
+    @DisplayName("목록?keyword=정말!% : 이스케이프 문자 ! 도 글자 그대로 검색된다.")
+    void t27() {
+        String rs = AppTestRunner.run("""
+                등록
+                정말!% 대단해
+                작자미상
+                등록
+                정말% 대단해
+                작자미상
+                등록
+                정말!! 대단해
+                작자미상
+                목록?keyword=정말!%
+                """);
+
+        assertThat(rs)
+                .contains("1 / 작자미상 / 정말!% 대단해")
+                .doesNotContain("2 / 작자미상 / 정말% 대단해")
+                .doesNotContain("3 / 작자미상 / 정말!! 대단해");
+    }
+
+    @Test
+    @DisplayName("목록?keyword=C:\\temp : 역슬래시도 글자 그대로 검색된다.")
+    void t28() {
+        String rs = AppTestRunner.run("""
+                등록
+                C:\\temp 폴더
+                작자미상
+                등록
+                C:temp 폴더
+                작자미상
+                목록?keyword=C:\\temp
+                """);
+
+        assertThat(rs)
+                .contains("1 / 작자미상 / C:\\temp 폴더")
+                .doesNotContain("2 / 작자미상 / C:temp 폴더");
+    }
 }

@@ -59,11 +59,23 @@ public class DbConfig {
     }
 
     private static String resolve(String envName, String propertyName) {
-        String envValue = System.getenv(envName);
+        return choose(System.getenv(envName), properties().getProperty(propertyName));
+    }
 
-        if (envValue != null) return envValue;
+    // 빈(공백뿐인) 환경변수는 설정하지 않은 것으로 본다. 그래야 db.properties 값을 가리지 않는다.
+    static String choose(String envValue, String propertyValue) {
+        if (envValue != null && !envValue.isBlank()) return envValue;
 
-        return loadProperties().getProperty(propertyName);
+        return propertyValue;
+    }
+
+    private static Properties cachedProperties;
+
+    // db.properties 는 처음 필요할 때 한 번만 읽고 이후에는 같은 값을 쓴다.
+    private static synchronized Properties properties() {
+        if (cachedProperties == null) cachedProperties = loadProperties();
+
+        return cachedProperties;
     }
 
     private static Properties loadProperties() {
