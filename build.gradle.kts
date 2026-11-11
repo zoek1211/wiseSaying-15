@@ -18,6 +18,11 @@ repositories {
     mavenCentral()
 }
 
+// 채점 환경이 어떤 JDK 든 Java 21 기준으로 컴파일한다. (List.reversed() 등 21 API 사용)
+tasks.withType<JavaCompile>().configureEach {
+    options.release = 21
+}
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:6.0.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

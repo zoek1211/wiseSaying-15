@@ -1,3 +1,7 @@
+## Running tests
+
+Tests need a local MySQL with the test DB set up. Follow README sections 1–3 before running `./gradlew test`.
+
 ## Agent skills
 
 ### Issue tracker
