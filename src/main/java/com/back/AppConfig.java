@@ -19,4 +19,9 @@ public class AppConfig {
     public static String getDbDirPath() {
         return isTestMode() ? "db_test" : "db";
     }
+
+    // 빌드(Export) 결과 data.json 의 위치. 저장소 구현과 상관없이 한 곳에서 정한다.
+    public static String getExportFilePath() {
+        return getDbDirPath() + "/wiseSaying/data.json";
+    }
 }

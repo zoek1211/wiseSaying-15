@@ -1,9 +1,10 @@
 package com.back.domain.wiseSaying.repository;
 
-import com.back.AppTestRunner;
+import com.back.AppConfig;
 import com.back.domain.wiseSaying.entity.WiseSaying;
 import com.back.standard.dto.Page;
 import com.back.standard.dto.Pageable;
+import com.back.standard.util.Util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,9 @@ public class WiseSayingFileRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        AppTestRunner.clearDb();
+        // 파일 리포지터리 자체의 테스트이므로 저장 폴더를 직접 비운다.
+        AppConfig.setTestMode();
+        Util.file.rmdir(AppConfig.getDbDirPath());
         wiseSayingFileRepository = new WiseSayingFileRepository();
     }
 
@@ -83,5 +86,35 @@ public class WiseSayingFileRepositoryTest {
         assertThat(page.getContent())
                 .extracting(WiseSaying::getId)
                 .containsExactly(2, 1);
+    }
+
+    @Test
+    @DisplayName("저장하면 WiseSaying 하나당 {번호}.json 파일이 생기고 lastId.txt 가 갱신된다.")
+    void t7() {
+        wiseSayingFileRepository.save(new WiseSaying("현재를 사랑하라.", "작자미상"));
+
+        String dir = AppConfig.getDbDirPath() + "/wiseSaying";
+
+        assertThat(Util.file.get(dir + "/1.json", "")).isEqualTo("""
+                {
+                    "id": 1,
+                    "content": "현재를 사랑하라.",
+                    "author": "작자미상"
+                }
+                """.stripIndent().trim());
+        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("삭제하면 {번호}.json 파일은 지워지고 lastId.txt 는 값을 유지한다.")
+    void t8() {
+        WiseSaying wiseSaying = wiseSayingFileRepository.save(new WiseSaying("현재를 사랑하라.", "작자미상"));
+
+        wiseSayingFileRepository.delete(wiseSaying);
+
+        String dir = AppConfig.getDbDirPath() + "/wiseSaying";
+
+        assertThat(Util.file.notExists(dir + "/1.json")).isTrue();
+        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
     }
 }

@@ -9,7 +9,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class AppTest {
     @BeforeEach
     void beforeEach() {
-        AppTestRunner.clearDb();
+        AppTestRunner.resetStorage();
     }
 
     @Test

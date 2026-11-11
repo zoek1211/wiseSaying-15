@@ -22,7 +22,7 @@ public class WiseSayingFileRepository implements WiseSayingRepository {
     }
 
     public String getArchiveFilePath() {
-        return getTableDirPath() + "/data.json";
+        return AppConfig.getExportFilePath();
     }
 
     @Override

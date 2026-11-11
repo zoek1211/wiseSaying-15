@@ -12,8 +12,9 @@ public class AppTestRunner {
         AppConfig.setTestMode();
     }
 
-    // 테스트 전용 저장 폴더를 비운다. 매 테스트 전에 호출한다.
-    public static void clearDb() {
+    // 테스트 전용 저장소를 비운다. 모든 콘솔 테스트가 @BeforeEach 에서 이것만 호출하므로,
+    // 저장소가 바뀌면(폴더 삭제 → TRUNCATE) 여기만 고치면 된다.
+    public static void resetStorage() {
         AppConfig.setTestMode();
         Util.file.rmdir(AppConfig.getDbDirPath());
     }

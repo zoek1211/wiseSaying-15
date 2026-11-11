@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WiseSayingControllerTest {
     @BeforeEach
     void beforeEach() {
-        AppTestRunner.clearDb();
+        AppTestRunner.resetStorage();
     }
     @Test
     @DisplayName("등록")
@@ -389,34 +389,8 @@ public class WiseSayingControllerTest {
     }
 
     @Test
-    @DisplayName("등록하면 {번호}.json 과 lastId.txt 가 생기고, 삭제하면 json 파일이 지워진다.")
-    void t20() {
-        AppTestRunner.run("""
-                등록
-                현재를 사랑하라.
-                작자미상
-                """);
-
-        String dir = AppConfig.getDbDirPath() + "/wiseSaying";
-
-        assertThat(Util.file.get(dir + "/1.json", "")).isEqualTo("""
-                {
-                    "id": 1,
-                    "content": "현재를 사랑하라.",
-                    "author": "작자미상"
-                }
-                """.stripIndent().trim());
-        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
-
-        AppTestRunner.run("삭제?id=1");
-
-        assertThat(Util.file.notExists(dir + "/1.json")).isTrue();
-        assertThat(Util.file.get(dir + "/lastId.txt", "")).isEqualTo("1");
-    }
-
-    @Test
     @DisplayName("빌드")
-    void t21() {
+    void t20() {
         String rs = AppTestRunner.run("""
                 등록
                 명언 1
@@ -429,7 +403,7 @@ public class WiseSayingControllerTest {
 
         assertThat(rs).contains("data.json 파일의 내용이 갱신되었습니다.");
 
-        assertThat(Util.file.get(AppConfig.getDbDirPath() + "/wiseSaying/data.json", "")).isEqualTo("""
+        assertThat(Util.file.get(AppConfig.getExportFilePath(), "")).isEqualTo("""
                 [
                     {
                         "id": 1,

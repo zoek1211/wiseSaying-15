@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SystemControllerTest {
     @BeforeEach
     void beforeEach() {
-        AppTestRunner.clearDb();
+        AppTestRunner.resetStorage();
     }
 
     @Test
