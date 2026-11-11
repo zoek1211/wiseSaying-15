@@ -418,4 +418,48 @@ public class WiseSayingControllerTest {
                 ]
                 """.stripIndent().trim());
     }
+
+    @Test
+    @DisplayName("빌드 : 테스트 모드에서는 db_test/data.json 에 Export 한다.")
+    void t21() {
+        AppTestRunner.run("""
+                등록
+                현재를 사랑하라.
+                작자미상
+                빌드
+                """);
+
+        assertThat(Util.file.get("db_test/data.json", "")).isEqualTo("""
+                [
+                    {
+                        "id": 1,
+                        "content": "현재를 사랑하라.",
+                        "author": "작자미상"
+                    }
+                ]
+                """.stripIndent().trim());
+    }
+
+    @Test
+    @DisplayName("빌드 : 명언이 없으면 빈 배열을 Export 한다.")
+    void t22() {
+        String rs = AppTestRunner.run("빌드");
+
+        assertThat(rs).contains("data.json 파일의 내용이 갱신되었습니다.");
+        assertThat(Util.file.get(AppConfig.getExportFilePath(), "").replaceAll("\\s", "")).isEqualTo("[]");
+    }
+
+    @Test
+    @DisplayName("따옴표·역슬래시가 들어간 명언 내용이 재시작 후에도 그대로 나온다.")
+    void t23() {
+        AppTestRunner.run("""
+                등록
+                그는 "안녕"이라 말했다. C:\\temp\\new 'ok'
+                작자"미상
+                """);
+
+        String rs = AppTestRunner.run("목록");
+
+        assertThat(rs).contains("1 / 작자\"미상 / 그는 \"안녕\"이라 말했다. C:\\temp\\new 'ok'");
+    }
 }

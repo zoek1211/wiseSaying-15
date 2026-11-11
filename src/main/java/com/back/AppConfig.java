@@ -21,7 +21,8 @@ public class AppConfig {
     }
 
     // 빌드(Export) 결과 data.json 의 위치. 저장소 구현과 상관없이 한 곳에서 정한다.
+    // 운영: 프로젝트 루트의 data.json, 테스트: db_test/data.json
     public static String getExportFilePath() {
-        return getDbDirPath() + "/wiseSaying/data.json";
+        return isTestMode() ? "db_test/data.json" : "data.json";
     }
 }

@@ -45,5 +45,11 @@ bin/
 ### Custom ###
 temp
 ### App data ###
-db/
-db_test/
+/db/
+/db_test/
+
+### Local DB credentials ###
+/db.properties
+
+### Export ###
+/data.json

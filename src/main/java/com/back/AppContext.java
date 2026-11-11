@@ -2,7 +2,7 @@ package com.back;
 
 import com.back.domain.system.controller.SystemController;
 import com.back.domain.wiseSaying.controller.WiseSayingController;
-import com.back.domain.wiseSaying.repository.WiseSayingFileRepository;
+import com.back.domain.wiseSaying.repository.WiseSayingDbRepository;
 import com.back.domain.wiseSaying.repository.WiseSayingRepository;
 import com.back.domain.wiseSaying.service.WiseSayingService;
 
@@ -19,7 +19,8 @@ public class AppContext {
         scanner = _scanner;
         systemController = new SystemController();
         // 리포지터리 구현체만 갈아 끼우면 컨트롤러·서비스는 그대로 동작한다.
-        wiseSayingRepository = new WiseSayingFileRepository();
+        // 파일 저장소로 되돌리려면 new WiseSayingFileRepository() 로 바꾸면 된다.
+        wiseSayingRepository = new WiseSayingDbRepository();
         wiseSayingService = new WiseSayingService();
         wiseSayingController = new WiseSayingController();
     }
