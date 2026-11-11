@@ -81,5 +81,8 @@ cp db.properties.example db.properties   # 필요하면 값 수정
 - `AppContext` 에서 `new WiseSayingFileRepository()` 를 `new WiseSayingDbRepository()` 로 바꾼 한 줄이 교체의 전부입니다. 컨트롤러·서비스는 바뀌지 않았습니다.
 - SQL·JDBC 는 `WiseSayingDbRepository` 와 접속 정보 도우미 `DbConfig` 에만 있습니다.
 - 새 명언은 INSERT 후 AUTO_INCREMENT 로 생성된 키를 번호로 쓰고, 기존 명언은 번호로 UPDATE 합니다. AUTO_INCREMENT 는 삭제된 번호를 재사용하지 않습니다.
-- 검색·페이징은 아직 인터페이스의 기본(메모리) 구현을 씁니다.
+- 검색·페이징은 SQL 에서 합니다. `WiseSayingDbRepository` 가 인터페이스의 기본(메모리) 구현을 덮어써서,
+  검색 종류에 따라 `WHERE content LIKE ?` / `author LIKE ?` / `content LIKE ? OR author LIKE ?` 와
+  `ORDER BY id DESC LIMIT ? OFFSET ?` 로 한 페이지를 가져오고, 같은 조건의 `SELECT COUNT(*)` 로 페이지 수를 셉니다.
+- 검색어의 `\`, `%`, `_` 는 이스케이프해서 글자 그대로 찾습니다. 예를 들어 `목록?keyword=100%` 는 "1000번의 시도" 를 찾지 않습니다.
 - 파일 구현체 `WiseSayingFileRepository` 와 메모리 구현체 `WiseSayingMemoryRepository` 는 대안으로 남아 있고, 파일 구현체는 자체 테스트(`WiseSayingFileRepositoryTest`)가 있습니다.

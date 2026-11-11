@@ -462,4 +462,40 @@ public class WiseSayingControllerTest {
 
         assertThat(rs).contains("1 / 작자\"미상 / 그는 \"안녕\"이라 말했다. C:\\temp\\new 'ok'");
     }
+
+    @Test
+    @DisplayName("목록?keyword=100% : % 는 와일드카드가 아니라 글자 그대로 검색된다.")
+    void t24() {
+        String rs = AppTestRunner.run("""
+                등록
+                100% 노력
+                작자미상
+                등록
+                1000번의 시도
+                작자미상
+                목록?keyword=100%
+                """);
+
+        assertThat(rs)
+                .contains("1 / 작자미상 / 100% 노력")
+                .doesNotContain("2 / 작자미상 / 1000번의 시도");
+    }
+
+    @Test
+    @DisplayName("목록?keyword=실패_성공 : _ 는 와일드카드가 아니라 글자 그대로 검색된다.")
+    void t25() {
+        String rs = AppTestRunner.run("""
+                등록
+                실패_성공
+                작자미상
+                등록
+                실패와성공
+                작자미상
+                목록?keyword=실패_성공
+                """);
+
+        assertThat(rs)
+                .contains("1 / 작자미상 / 실패_성공")
+                .doesNotContain("2 / 작자미상 / 실패와성공");
+    }
 }
